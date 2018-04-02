@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"rootDir": "source",
+		"outDir": "dist",
+		"target": "esnext",
+		"lib": ["es6"],
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"declaration": true,
+		"noImplicitAny": true
+	},
+	"include": [
+		"source/**/*.ts"
+	]
+}

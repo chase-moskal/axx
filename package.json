@@ -1,0 +1,21 @@
+{
+  "name": "axx",
+  "version": "0.0.0-dev.0",
+  "description": "",
+  "main": "axx.js",
+  "scripts": {
+    "prepare": "rm -rf dist && tsc",
+    "test": "exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "9.6.1",
+    "typescript": "2.8.1"
+  },
+  "peerDependencies": {
+    "@types/node": "9.*"
+  }
+}
