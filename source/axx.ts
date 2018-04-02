@@ -2,29 +2,37 @@
 import {Stream, Writable, Readable} from "stream"
 import {ChildProcess, spawn, exec} from "child_process"
 
-export async function wait(task: ChildProcess): Promise<string> {
+export class AxxError extends Error {
+	readonly code: number
+
+	constructor(message: string, code: number) {
+		super(message)
+		this.code = code
+	}
+}
+
+export async function wait(task: ChildProcess, record = false): Promise<string> {
 	let stdout: string = ""
 	let stderr: string = ""
-	task.stdout.on("data", data => stdout += data)
-	task.stderr.on("data", data => stderr += data)
+	if (record) {
+		task.stdout.on("data", data => stdout += data)
+		task.stderr.on("data", data => stderr += data)
+	}
 	return new Promise<string>((resolve, reject) => {
 		task.on("close", (code: number, signal: string) => {
 			if (code === 0) resolve(stdout)
-			else {
-				const error = new Error(`error code ${code}: ${stderr}`)
-				;(<any>error).code = code
-				reject(error)
-			}
+			else reject(new AxxError(`axx error: ${stderr}`, code))
 		})
 	})
 }
 
 export interface AxxConnector {
-	data: Stream
+	stream: Writable
 	result: Promise<string>
+	endResult: Promise<string>
 }
 
-export default function axx(cmd: string, input?: AxxConnector): AxxConnector {
+export default function axx(cmd: string, output?: AxxConnector, record = false): AxxConnector {
 	const task = spawn(cmd, [], {
 		shell: true,
 		cwd: process.cwd(),
@@ -32,14 +40,53 @@ export default function axx(cmd: string, input?: AxxConnector): AxxConnector {
 		stdio: "pipe"
 	})
 
-	if (input) input.data.pipe(task.stdin)
-	const data: Readable = task.stdout
-	const waitWithInput = () => Promise.all([input.result, wait(task)])
-		.then(([inputResult, taskResult]) => taskResult)
+	if (output && task.stdout)
+		task.stdout.pipe(output.stream)
 
-	return input
-		? {data, result: waitWithInput()}
-		: {data, result: wait(task)}
+	const waitWithOutput = (end: boolean) => Promise
+		.all([wait(task, record), output.result])
+		.then(([thisResult, nextResult]) => end ? nextResult : thisResult)
+
+	return {
+		stream: task.stdin,
+		result: output ? waitWithOutput(false) : wait(task, record),
+		endResult: output ? waitWithOutput(true) : wait(task, record)
+	}
 }
+
+export interface NaxxOptions {
+	cmd: string
+	output: AxxConnector
+	record: boolean
+}
+
+export function maxx(cmd: string, output?: AxxConnector): AxxConnector {
+	return axx(cmd, output, true)
+}
+
+export function caxx(): AxxConnector {
+	return {
+		stream: process.stdout,
+		result: Promise.resolve(""),
+		endResult: Promise.resolve("")
+	}
+}
+
+export function collect(): AxxConnector {
+	const stream = new Writable()
+	let data = ""
+	const result = new Promise<string>((resolve, reject) => {
+		stream.on("data", d => data += d)
+		stream.on("close", () => resolve(data))
+	})
+	return {
+		stream,
+		result,
+		endResult: result
+	}
+}
+
+export function waxx(path: string): AxxConnector {return}
+export function raxx(path: string, output?: AxxConnector, record = false): AxxConnector {return}
 
 export {axx}

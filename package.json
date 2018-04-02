@@ -1,8 +1,8 @@
 {
   "name": "axx",
-  "version": "0.0.0-dev.0",
+  "version": "0.0.0-dev.4",
   "description": "",
-  "main": "axx.js",
+  "main": "dist/axx.js",
   "scripts": {
     "prepare": "rm -rf dist && tsc",
     "test": "exit 0"
