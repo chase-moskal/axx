@@ -1,21 +1,23 @@
 {
-  "name": "axx",
-  "version": "0.0.0-dev.4",
-  "description": "",
-  "main": "dist/axx.js",
-  "scripts": {
-    "prepare": "rm -rf dist && tsc",
-    "test": "exit 0"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {},
-  "devDependencies": {
-    "@types/node": "9.6.1",
-    "typescript": "2.8.1"
-  },
-  "peerDependencies": {
-    "@types/node": "9.*"
-  }
+	"name": "axx",
+	"version": "0.0.0-dev.5",
+	"description": "",
+	"main": "dist/axx.js",
+	"scripts": {
+		"prepare": "rm -rf dist && tsc && npm test -s",
+		"test": "jest"
+	},
+	"keywords": [],
+	"author": "Chase Moskal <chasemoskal@gmail.com>",
+	"license": "ISC",
+	"dependencies": {},
+	"devDependencies": {
+		"@types/jest": "22.2.2",
+		"@types/node": "9.6.1",
+		"jest": "22.4.3",
+		"typescript": "2.8.1"
+	},
+	"peerDependencies": {
+		"@types/node": "9.*"
+	}
 }
