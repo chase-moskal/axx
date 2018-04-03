@@ -1,8 +1,8 @@
 {
 	"name": "axx",
-	"version": "0.0.0-dev.5",
+	"version": "0.0.0-dev.6",
 	"description": "",
-	"main": "dist/axx.js",
+	"main": "dist",
 	"scripts": {
 		"prepare": "rm -rf dist && tsc && npm test -s",
 		"test": "jest"

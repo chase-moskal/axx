@@ -1,7 +1,7 @@
 
-import {writeFile, createWriteStream, createReadStream} from "fs"
 import {Stream, Writable, Readable} from "stream"
 import {ChildProcess, spawn, exec} from "child_process"
+import {writeFile, createWriteStream, createReadStream} from "fs"
 
 export class AxxError extends Error {
 	readonly code: number
@@ -35,7 +35,7 @@ export interface AxxConnector {
 	firstResult: Promise<string>
 }
 
-export default function axx(cmd: string, record = false, output?: AxxConnector): AxxConnector {
+export default function axx(cmd: string, output?: AxxConnector, record = false): AxxConnector {
 	const task = spawn(cmd, [], {
 		shell: true,
 		cwd: process.cwd(),
@@ -62,56 +62,8 @@ export default function axx(cmd: string, record = false, output?: AxxConnector):
 	}
 }
 
-export interface NaxxOptions {
-	cmd: string
-	output: AxxConnector
-	record: boolean
-}
-
-export function caxx(): AxxConnector {
-	return {
-		stream: process.stdout,
-		result: Promise.resolve(""),
-		firstResult: Promise.resolve("")
-	}
-}
-
-export function collect(): AxxConnector {
-	const stream = new Writable()
-	let data = ""
-	const result = new Promise<string>((resolve, reject) => {
-		stream.on("data", d => data += d)
-		stream.on("close", () => resolve(data))
-	})
-	return {stream, result, firstResult: result}
-}
-
-export function waxx(path: string): AxxConnector {
-	const stream = createWriteStream(path)
-	const result = new Promise<string>((resolve, reject) => stream.on("close", () => resolve("")))
-	return {stream, result, firstResult: result}
-}
-
-export function raxx(path: string, record = false, output?: AxxConnector): AxxConnector {
-	const stream = createReadStream(path)
-	if (output) stream.pipe(output.stream)
-
-	let data = ""
-	if (record) stream.on("data", d => data += d)
-
-	const firstResult = new Promise<string>((resolve, reject) => {
-		stream.on("close", () => resolve(data))
-	})
-
-	const result = output
-		? Promise.all([firstResult, output.result]).then(([first, next]) => next)
-		: firstResult
-
-	return {
-		stream: null,
-		firstResult,
-		result
-	}
-}
-
 export {axx}
+
+export function maxx(cmd: string, output?: AxxConnector): AxxConnector {
+	return axx(cmd, output, true)
+}
