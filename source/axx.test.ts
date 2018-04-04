@@ -4,15 +4,13 @@ import axx, {maxx} from "./axx"
 describe("axx", () => {
 
 	test("axx- can run a command", async() => {
-		const connector = maxx(`ls .`)
-		const result = await connector.result
+		const result = await maxx(`ls .`).result
 		expect(result).toBeDefined()
 		expect(result.length).toBeGreaterThan(0)
 	})
 
 	test("axx- can pipe forward", async() => {
-		const connector = axx(`cat LICENSE.txt`, maxx(`grep Chase`))
-		const result = await connector.result
+		const result = await axx(`cat LICENSE.txt`, maxx(`grep Chase`)).result
 		expect(result).toBeDefined()
 		expect(result.length).toBeGreaterThan(0)
 	})

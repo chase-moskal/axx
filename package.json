@@ -1,14 +1,19 @@
 {
 	"name": "axx",
-	"version": "0.0.0",
-	"description": "",
+	"version": "0.0.1-dev.0",
+	"description": "async shell exec, streams, piping",
 	"main": "dist",
 	"scripts": {
 		"prepare": "rm -rf dist && tsc && npm test -s",
 		"build-debug": "rm -rf dist && tsc --sourceMap false --inlineSourceMap true",
 		"test": "jest"
 	},
-	"keywords": [],
+	"keywords": [
+		"async",
+		"shell",
+		"exec",
+		"pipe"
+	],
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
 	"license": "ISC",
 	"dependencies": {},
