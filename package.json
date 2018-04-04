@@ -1,6 +1,6 @@
 {
 	"name": "axx",
-	"version": "0.0.2-dev.0",
+	"version": "0.1.0",
 	"description": "async shell exec, streams, piping",
 	"main": "dist",
 	"scripts": {

@@ -11,7 +11,6 @@ export interface AxxOptions {
 export interface AxxConnector {
 	stdin: Writable
 	result: Promise<string>
-	firstResult: Promise<string>
 }
 
 export class AxxError extends Error {
@@ -23,7 +22,7 @@ export class AxxError extends Error {
 	}
 }
 
-export async function wait(task: ChildProcess, record = false): Promise<string> {
+export async function wait(task: ChildProcess, {record = false, combineStderr = false}: AxxOptions = {}): Promise<string> {
 	let stdout: string = ""
 	let stderr: string = ""
 
@@ -34,17 +33,17 @@ export async function wait(task: ChildProcess, record = false): Promise<string> 
 
 	return new Promise<string>((resolve, reject) => {
 		task.on("close", (code: number, signal: string) => {
-			if (code === 0) resolve(stdout + stderr)
+			if (code === 0) resolve(combineStderr ? stdout + stderr : stdout)
 			else reject(`axx error, code ${code}, signal ${signal}: ${stderr}`)
+		})
+		task.on("error", (error: Error) => {
+			error.message = `axx error: ${error.message}`
+			reject(error)
 		})
 	})
 }
 
 export default function axx(cmd: string, next?: AxxConnector, options: AxxOptions = {}): AxxConnector {
-	const {
-		record = false,
-		combineStderr = false
-	} = options
 
 	const task = spawn(cmd, [], {
 		shell: true,
@@ -53,22 +52,21 @@ export default function axx(cmd: string, next?: AxxConnector, options: AxxOption
 		stdio: "pipe"
 	})
 
-	if (next && task.stdout) task.stdout.pipe(next.stdin)
-	if (next && task.stderr && combineStderr) task.stderr.pipe(next.stdin)
+	if (next) task.stdout.pipe(next.stdin)
+	if (next && options.combineStderr) task.stderr.pipe(next.stdin)
 
 	async function chainWait(first: boolean): Promise<string> {
-		if (!next) return wait(task, record)
-		const [firstResult, nextResult] = await Promise.all([
-			wait(task, record),
+		if (!next) return wait(task, options)
+		const [result, nextResult] = await Promise.all([
+			wait(task, options),
 			next.result
 		])
-		return first ? firstResult : nextResult
+		return first ? result : nextResult
 	}
 
 	return {
 		stdin: task.stdin,
-		result: chainWait(false),
-		firstResult: chainWait(true)
+		result: chainWait(false)
 	}
 }
 

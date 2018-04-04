@@ -10,8 +10,7 @@ export default function caxx(): AxxConnector {
 
 	return {
 		stdin: process.stdout,
-		result,
-		firstResult: result
+		result
 	}
 }
 

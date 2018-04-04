@@ -15,19 +15,7 @@ describe("axx", () => {
 		expect(result.length).toBeGreaterThan(0)
 	})
 
-	test("axx- supports first and last result", async() => {
-		const connector = maxx(`cat LICENSE.txt`, axx(`cat`, maxx(`grep Chase`)))
-		const [result, firstResult] = await Promise.all([
-			await connector.result,
-			await connector.firstResult
-		])
-		const {length} = result
-		const {length: firstLength} = firstResult
-
-		expect(result).toBeDefined()
-		expect(firstResult).toBeDefined()
-		expect(length).toBeGreaterThan(0)
-		expect(firstLength).toBeGreaterThan(0)
-		expect(length).not.toBe(firstLength)
+	test("axx- can fail a command gracefully", async() => {
+		expect(axx(`exit 123`).result).rejects.toBeDefined()
 	})
 })

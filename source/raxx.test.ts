@@ -15,4 +15,8 @@ describe("raxx", () => {
 		expect(text).toBeDefined()
 		expect(text.length).toBeGreaterThan(100)
 	})
+
+	test("raxx- fails gracefully", async() => {
+		expect(raxx(`LICENSE-LOL-DOESNT-EXIST.txt`).result).rejects.toBeDefined()
+	})
 })

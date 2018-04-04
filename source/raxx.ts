@@ -16,6 +16,7 @@ export default function raxx(path: string, next?: AxxConnector, options: RaxxOpt
 
 	const firstResult = new Promise<string>((resolve, reject) => {
 		stream.on("close", () => resolve(data))
+		stream.on("error", (error: Error) => reject(error))
 	})
 
 	const result = next
@@ -24,7 +25,6 @@ export default function raxx(path: string, next?: AxxConnector, options: RaxxOpt
 
 	return {
 		stdin: null,
-		firstResult,
 		result
 	}
 }
