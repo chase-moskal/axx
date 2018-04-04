@@ -1,4 +1,5 @@
 
+import {PassThrough} from "stream"
 import {AxxConnector} from "./axx"
 
 export default function caxx(): AxxConnector {
@@ -8,7 +9,7 @@ export default function caxx(): AxxConnector {
 	})
 
 	return {
-		stream: process.stdout,
+		stdin: process.stdout,
 		result,
 		firstResult: result
 	}

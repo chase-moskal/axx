@@ -1,10 +1,15 @@
 
-import {AxxConnector} from "./axx"
 import {createReadStream} from "fs"
+import {AxxConnector} from "./axx"
 
-export default function raxx(path: string, output?: AxxConnector, record = false): AxxConnector {
+export interface RaxxOptions {
+	record?: boolean
+}
+
+export default function raxx(path: string, next?: AxxConnector, options: RaxxOptions = {}): AxxConnector {
+	const {record = false} = options
 	const stream = createReadStream(path)
-	if (output) stream.pipe(output.stream)
+	if (next) stream.pipe(next.stdin)
 
 	let data = ""
 	if (record) stream.on("data", d => data += d)
@@ -13,12 +18,12 @@ export default function raxx(path: string, output?: AxxConnector, record = false
 		stream.on("close", () => resolve(data))
 	})
 
-	const result = output
-		? Promise.all([firstResult, output.result]).then(([first, next]) => next)
+	const result = next
+		? Promise.all([firstResult, next.result]).then(([first, next]) => next)
 		: firstResult
 
 	return {
-		stream: null,
+		stdin: null,
 		firstResult,
 		result
 	}
@@ -26,6 +31,6 @@ export default function raxx(path: string, output?: AxxConnector, record = false
 
 export {raxx}
 
-export function mraxx(cmd: string, output?: AxxConnector): AxxConnector {
-	return raxx(cmd, output, true)
+export function mraxx(cmd: string, output?: AxxConnector, options: RaxxOptions = {}): AxxConnector {
+	return raxx(cmd, output, {...options, record: true})
 }

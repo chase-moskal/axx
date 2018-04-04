@@ -1,11 +1,11 @@
 
-import {AxxConnector} from "./axx"
 import {createWriteStream} from "fs"
+import {AxxConnector} from "./axx"
 
 export default function waxx(path: string): AxxConnector {
-	const stream = createWriteStream(path)
-	const result = new Promise<string>((resolve, reject) => stream.on("close", () => resolve("")))
-	return {stream, result, firstResult: result}
+	const stdin = createWriteStream(path)
+	const result = new Promise<string>((resolve, reject) => stdin.on("close", () => resolve("")))
+	return {stdin, result, firstResult: result}
 }
 
 export {waxx}

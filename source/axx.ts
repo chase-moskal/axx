@@ -3,6 +3,17 @@ import {Stream, Writable, Readable} from "stream"
 import {ChildProcess, spawn, exec} from "child_process"
 import {writeFile, createWriteStream, createReadStream} from "fs"
 
+export interface AxxOptions {
+	record?: boolean
+	combineStderr?: boolean
+}
+
+export interface AxxConnector {
+	stdin: Writable
+	result: Promise<string>
+	firstResult: Promise<string>
+}
+
 export class AxxError extends Error {
 	readonly code: number
 
@@ -23,19 +34,18 @@ export async function wait(task: ChildProcess, record = false): Promise<string> 
 
 	return new Promise<string>((resolve, reject) => {
 		task.on("close", (code: number, signal: string) => {
-			if (code === 0) resolve(stdout)
-			else reject(new AxxError(`axx error ${code} ${signal}: ${stderr}`, code))
+			if (code === 0) resolve(stdout + stderr)
+			else reject(`axx error, code ${code}, signal ${signal}: ${stderr}`)
 		})
 	})
 }
 
-export interface AxxConnector {
-	stream: Writable
-	result: Promise<string>
-	firstResult: Promise<string>
-}
+export default function axx(cmd: string, next?: AxxConnector, options: AxxOptions = {}): AxxConnector {
+	const {
+		record = false,
+		combineStderr = false
+	} = options
 
-export default function axx(cmd: string, output?: AxxConnector, record = false): AxxConnector {
 	const task = spawn(cmd, [], {
 		shell: true,
 		cwd: process.cwd(),
@@ -43,27 +53,27 @@ export default function axx(cmd: string, output?: AxxConnector, record = false):
 		stdio: "pipe"
 	})
 
-	if (output && task.stdout)
-		task.stdout.pipe(output.stream)
+	if (next && task.stdout) task.stdout.pipe(next.stdin)
+	if (next && task.stderr && combineStderr) task.stderr.pipe(next.stdin)
 
-	async function waitWithOutput(end: boolean): Promise<string> {
-		if (!output) return wait(task, record)
-		const [thisResult, nextResult] = await Promise.all([
+	async function chainWait(first: boolean): Promise<string> {
+		if (!next) return wait(task, record)
+		const [firstResult, nextResult] = await Promise.all([
 			wait(task, record),
-			output.result
+			next.result
 		])
-		return end ? nextResult : thisResult
+		return first ? firstResult : nextResult
 	}
 
 	return {
-		stream: task.stdin,
-		result: waitWithOutput(true),
-		firstResult: waitWithOutput(false)
+		stdin: task.stdin,
+		result: chainWait(false),
+		firstResult: chainWait(true)
 	}
 }
 
 export {axx}
 
-export function maxx(cmd: string, output?: AxxConnector): AxxConnector {
-	return axx(cmd, output, true)
+export function maxx(cmd: string, output?: AxxConnector, options: AxxOptions = {}): AxxConnector {
+	return axx(cmd, output, {...options, record: true})
 }

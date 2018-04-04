@@ -5,7 +5,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "debug",
-			"program": "${workspaceFolder}/dist/axx.test.js"
+			"program": "${workspaceFolder}/node_modules/.bin/jest"
 		}
 	]
 }

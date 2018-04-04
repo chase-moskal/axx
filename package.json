@@ -1,10 +1,11 @@
 {
 	"name": "axx",
-	"version": "0.0.0-dev.7",
+	"version": "0.0.0",
 	"description": "",
 	"main": "dist",
 	"scripts": {
 		"prepare": "rm -rf dist && tsc && npm test -s",
+		"build-debug": "rm -rf dist && tsc --sourceMap false --inlineSourceMap true",
 		"test": "jest"
 	},
 	"keywords": [],
