@@ -1,15 +1,17 @@
 
-import {PassThrough} from "stream"
+import {PassThrough, Writable} from "stream"
 import {AxxConnector} from "./axx"
 
-export default function caxx(): AxxConnector {
+export default function caxx(destination: Writable = process.stdout): AxxConnector {
 
-	const result = new Promise<string>((resolve, reject) => {
-		process.stdout.on("close", () => resolve(""))
-	})
+	const stdin = new PassThrough()
+	stdin.pipe(destination)
+
+	const result = Promise.resolve("")
 
 	return {
-		stdin: process.stdout,
+		stdin,
+		stdout: stdin,
 		result
 	}
 }

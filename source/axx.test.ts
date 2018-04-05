@@ -17,5 +17,7 @@ describe("axx", () => {
 
 	test("axx- can fail a command gracefully", async() => {
 		expect(axx(`exit 123`).result).rejects.toBeDefined()
+		expect(axx(`echo hello`, axx(`exit 123`)).result).rejects.toBeDefined()
+		expect(axx(`exit 123`, axx(`echo hello`)).result).rejects.toBeDefined()
 	})
 })

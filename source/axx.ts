@@ -10,6 +10,7 @@ export interface AxxOptions {
 
 export interface AxxConnector {
 	stdin: Writable
+	stdout: Readable
 	result: Promise<string>
 }
 
@@ -66,6 +67,7 @@ export default function axx(cmd: string, next?: AxxConnector, options: AxxOption
 
 	return {
 		stdin: task.stdin,
+		stdout: task.stdout,
 		result: chainWait(false)
 	}
 }
