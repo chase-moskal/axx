@@ -9,7 +9,7 @@ describe("caxx", () => {
 		let data = ""
 		const mockConsole = new PassThrough()
 		mockConsole.on("data", d => data += d)
-		await axx(`ls .`, caxx(mockConsole)).result
+		await axx(`ls .`, caxx(mockConsole))
 		expect(data).toBeDefined()
 		expect(data.length).toBeGreaterThan(0)
 	})

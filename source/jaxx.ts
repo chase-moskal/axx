@@ -17,13 +17,14 @@ export default function jaxx(data: string, next?: AxxConnector, options: AxxOpti
 	})
 
 	const result = next
-		? Promise.all([firstResult, next.result]).then(([first, next]) => next)
+		? Promise.all([firstResult, next]).then(([first, next]) => next)
 		: firstResult
 
 	return {
 		stdin: null,
 		stdout: stream,
-		result
+		then: result.then.bind(result),
+		catch: result.catch.bind(result)
 	}
 }
 

@@ -12,7 +12,8 @@ export default function caxx(destination: Writable = process.stdout): AxxConnect
 	return {
 		stdin,
 		stdout: stdin,
-		result
+		then: result.then.bind(result),
+		catch: result.catch.bind(result)
 	}
 }
 

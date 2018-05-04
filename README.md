@@ -21,13 +21,6 @@
 - [***maxx***](https://github.com/chase-moskal/axx/blob/master/source/axx.ts#L77) — same as *axx*, but returns the full stdout result
 - [***mraxx***](https://github.com/chase-moskal/axx/blob/master/source/raxx.ts#L34) — same as *raxx*, but returns the whole file to result
 
-### tips
-
-- remember -- `axx` and the other functions don't actually return *promises..*  
-	instead, they will return an AxxConnector object, which *does* has the `result` promise property
-- only `await` on the `result` promise of the *outer-most* `axx`-like call..  
-	axx results only return when all of the chain's next outputs have returned
-
 ### examples
 
 ```javascript
@@ -44,13 +37,13 @@ async function build() {
 		axx(`${n}/uglifyjs --compress --mangle`,
 			waxx(`myscript.min.js`)
 		)
-	).result
+	)
 
 	// run a few concurrent operations, wait for them all to complete
 	await Promise.all([
-		axx(`${n}/tsc`).result,
-		axx(`cat src/a src/b`, waxx(`dist/c`)).result,
-		axx(`${n}/node-sass --source-map true src/s.scss dist/s.css`).result
+		axx(`${n}/tsc`),
+		axx(`cat src/a src/b`, waxx(`dist/c`)),
+		axx(`${n}/node-sass --source-map true src/s.scss dist/s.css`)
 	])
 
 	console.log("✔ done build")
@@ -63,10 +56,10 @@ async function build() {
 ```javascript
 
 // log the package.json to the console just so i can see it
-await raxx(`package.json`, caxx()).result
+await raxx(`package.json`, caxx())
 
 // alternative (memory-hog) way to log to the console
-const text = await mraxx(`LICENSE.txt`).result
+const text = await mraxx(`LICENSE.txt`)
 console.log(text)
 
 ```

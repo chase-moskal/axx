@@ -5,7 +5,7 @@ import jaxx from "./jaxx"
 describe("jaxx", () => {
 
 	test("jaxx- can pipe a string", async() => {
-		const result = await jaxx(`hello`, maxx(`cat`)).result
+		const result = await jaxx(`hello`, maxx(`cat`))
 		expect(result).toMatch(/hello/igm)
 	})
 })

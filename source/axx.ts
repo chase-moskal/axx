@@ -8,10 +8,14 @@ export interface AxxOptions {
 	combineStderr?: boolean
 }
 
-export interface AxxConnector {
+export interface Thenable {
+	then(cb: (r: any) => void, eb?: (e: Error) => void): void
+	catch(eb: (e: Error) => void): void
+}
+
+export interface AxxConnector extends Thenable {
 	stdin: Writable
 	stdout: Readable
-	result: Promise<string>
 }
 
 export class AxxError extends Error {
@@ -60,15 +64,18 @@ export default function axx(cmd: string, next?: AxxConnector, options: AxxOption
 		if (!next) return wait(task, options)
 		const [result, nextResult] = await Promise.all([
 			wait(task, options),
-			next.result
+			next
 		])
 		return first ? result : nextResult
 	}
 
+	const result = chainWait(false)
+
 	return {
 		stdin: task.stdin,
 		stdout: task.stdout,
-		result: chainWait(false)
+		then: result.then.bind(result),
+		catch: result.catch.bind(result)
 	}
 }
 
